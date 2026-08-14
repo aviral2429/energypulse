@@ -1,0 +1,33 @@
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+env/
+
+# Service account key (NEVER commit this)
+simulator/serviceAccountKey.json
+*serviceAccountKey*.json
+
+# Node
+node_modules/
+npm-debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Debug
+debug-charts.html

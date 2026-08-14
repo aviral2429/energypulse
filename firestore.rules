@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isUserDocumentOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isResourceOwner() {
+      return isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    function isRequestOwner() {
+      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // 1. Users collection: indexed by User UID
+    match /users/{userId} {
+      allow read, write: if isUserDocumentOwner(userId);
+    }
+
+    // 2. Devices collection: read/write by owning user (matched via userId field)
+    match /devices/{deviceId} {
+      allow read: if isResourceOwner() || resource == null;
+      allow create: if isRequestOwner();
+      allow update, delete: if isResourceOwner();
+    }
+
+    // 3. Readings collection: telemetry time-series records
+    // Note: Firebase Admin SDK used by the python simulator bypasses security rules automatically
+    match /readings/{readingId} {
+      allow read: if isResourceOwner();
+      allow create: if isRequestOwner();
+      allow update, delete: if isResourceOwner();
+    }
+
+    // 4. Alerts collection: automated energy threshold notifications
+    match /alerts/{alertId} {
+      allow read: if isResourceOwner();
+      allow create: if isRequestOwner();
+      allow update, delete: if isResourceOwner();
+    }
+  }
+}
